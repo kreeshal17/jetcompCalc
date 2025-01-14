@@ -12,14 +12,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 val buttons = listOf(
-    "AC", "⌫", "%", "÷",
+    "AC", "X", "%", "/",
     "7", "8", "9", "×",
     "4", "5", "6", "-",
     "1", "2", "3", "+",
@@ -43,7 +41,12 @@ val buttons = listOf(
 
 
 @Composable
-fun calculator(modifier: Modifier=Modifier) {
+fun calculator(modifier: Modifier=Modifier,viewModel: CalculatorViewModel) {
+
+   val  equationText=viewModel.equationText.observeAsState()
+    val resultText=viewModel.resultText.observeAsState()
+
+
     Box(modifier = modifier)
     {
         Column(
@@ -53,12 +56,12 @@ fun calculator(modifier: Modifier=Modifier) {
 
         ) {
 
-            Text(text = "123 +123", fontSize = 40.sp, style = TextStyle(textAlign = TextAlign.End)
+            Text(text = equationText.value?:" 0", fontSize = 40.sp, style = TextStyle(textAlign = TextAlign.End)
             ,
                 overflow= TextOverflow.Ellipsis,
                 maxLines = 5)
             Spacer(modifier=Modifier.height(5.dp))
-            Text(text = "246", fontSize = 80.sp, style = TextStyle(textAlign = TextAlign.End)
+            Text(text = resultText.value?:" ", fontSize = 80.sp, style = TextStyle(textAlign = TextAlign.End)
                 ,
                 overflow= TextOverflow.Ellipsis,
                 maxLines = 1)
@@ -67,7 +70,7 @@ fun calculator(modifier: Modifier=Modifier) {
           LazyVerticalGrid(
               columns =GridCells.Fixed(4)) {
               items(buttons ) {
-                  calculatorbutton(btn=it)
+                  calculatorbutton(btn=it, onClick = { viewModel.onclickedbtn(it)})
 
 
               }
@@ -76,12 +79,12 @@ fun calculator(modifier: Modifier=Modifier) {
     }
 }
 @Composable
-fun calculatorbutton(btn:String)
+fun calculatorbutton(btn:String,onClick:()->Unit)
 {
 
     Box(modifier=Modifier.padding(20.dp))
     {
-        FloatingActionButton(onClick = { },
+        FloatingActionButton(onClick = onClick,
             shape = CircleShape,
             modifier=Modifier.size(80.dp),
             contentColor = Color.White,
@@ -96,11 +99,11 @@ fun calculatorbutton(btn:String)
     }
 }}
 fun getColor(btn:String): Color {
-    if (btn == "AC" || btn == "⌫") {
+    if (btn == "AC" || btn == "X") {
         return Color.Red // Red for AC and Backspace
     } else if (btn == "%" || btn == "=") {
         return Color.Green // Green for percentage and equals
-    } else if (btn == "÷" || btn == "×" || btn == "-" || btn == "+") {
+    } else if (btn == "/" || btn == "×" || btn == "-" || btn == "+") {
         return Color.Gray // Gray for operators (+, -, ×, ÷)
     } else {
         return Color.Black // Black for numbers or other buttons
